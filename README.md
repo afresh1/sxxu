@@ -1,4 +1,1 @@
-sxxu
-====
-
-OpenBSD SiteXX Utilities
+README
