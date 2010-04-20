@@ -66,25 +66,34 @@ function include {
         return
     fi
 
-    local _role_dir="${WRKINST}/var/siteXX/${_src}"
-    if [ -d "$_role_dir" ]; then
+    local _siteXX_src="${SRCDIR}/${_src}/siteXX"
+    local _siteXX_dst="${WRKINST}/var/siteXX/${_src}"
+    if [ -d "$_siteXX_dst" ]; then
         echo -n " !!!${_src}!!!"
         return
     fi
-    mkdir -p "$_role_dir"
+    mkdir -p "$_siteXX_dst"
     
     echo -n " $_src"
 
     copy_special "${SRCDIR}/${_src}" "${WRKINST}"
 
-    if [ -d "${SRCDIR}/${_src}/siteXX" ]; then
-        copy_special "${SRCDIR}/${_src}/siteXX" "$_role_dir"
+    if [ -d "$_siteXX_src" ]; then
+        copy_special "$_siteXX_src" "$_siteXX_dst"
 
-        if [ -e "${SRCDIR}/${_src}/siteXX/roles" ]; then
+        if [ -e "${_siteXX_src}/mtree" ]; then
+            mtree -Uep "${WRKINST}" < "${_siteXX_src}/mtree"
+        fi
+
+        if [ X"NORECURSE" != X"" ]; then
+            return
+        fi
+
+        if [ -e "${_siteXX_src}/roles" ]; then
             local _role
             while read _role; do
                 include "$_role"
-            done < "${SRCDIR}/${_src}/siteXX/roles"
+            done < "${_siteXX_src}/roles"
         fi
     fi
 }
@@ -107,6 +116,19 @@ for _cfg in .siteXXrc ~/.siteXXrc /etc/siteXX.conf; do
     [ -e $_cfg ] && . $_cfg && break
 done
 
+while getopts mkw: arg; do
+    case ${arg} in 
+    m)
+        REGEN_MTREE=1
+        NORECURSE=1
+    ;;
+    k)
+        NOREMOVE=1
+    ;;
+    w)
+        WRKDIR=${OPTARG}
+    esac
+done
 
 set -A machines "$@"
 if [ ${#machines[@]} -eq 0 ]; then
@@ -114,7 +136,9 @@ if [ ${#machines[@]} -eq 0 ]; then
     local _d
     for _d in *; do
         [ ! -d "$_d" ] && continue
-        [ "${_d#role-}" != "$_d" ] && continue
+        if [ -z "${REGEN_MTREE}" ]; then
+            [ "${_d#role-}" != "$_d" ] && continue
+        fi
 		machines[$_i]="${_d}"
         _i=$((_i+1))
 	done
@@ -135,25 +159,34 @@ for machine in "${machines[@]}"; do
     fi
 
     echo populating: $_site
-    echo -n ' including:'
 
     WRKINST="${WRKDIR}/${_site}"
 
+    echo -n ' including:'
     include "${machine}"
 
-    if [ X"${machine}" != X"${COMMONDIR}" \
-        -a -d "${SRCDIR}/${COMMONDIR}" ]; then
-        include $COMMONDIR
-    fi
+    if [ ! -z "${REGEN_MTREE}" ]; then
+        echo -n "\n regenerate mtree"
+        mkdir -p "${SRCDIR}/${machine}/siteXX"
+        mtree -cp "${WRKINST}" -k uid,gid,mode > "${SRCDIR}/${machine}/siteXX/mtree"
+    else 
+        if [ X"${machine}" != X"${COMMONDIR}" \
+            -a -d "${SRCDIR}/${COMMONDIR}" ]; then
+            include $COMMONDIR
+        fi
 
-    if [ -e "${INSTALL_SITE}" ]; then
-        cp ${INSTALL_SITE} "$WRKINST/install.site"
-    fi
+        if [ -e "${INSTALL_SITE}" ]; then
+            cp ${INSTALL_SITE} "$WRKINST/install.site"
+        fi
 
-    local _tgz="${RELEASEDIR}/${_site}.tgz"
-    echo -n "\n  creating: $_tgz"
-	tar -cz -C "${WRKINST}" -f "$_tgz" .
+        local _tgz="${RELEASEDIR}/${_site}.tgz"
+        echo -n "\n  creating: $_tgz"
+        tar -cz -C "${WRKINST}" -f "$_tgz" .
+    
+    fi
     echo ' . . . done'
 done
 
-rm -rf $WRKDIR
+if [ -s "$NOREMOVE" ]; then
+    rm -rf $WRKDIR
+fi
