@@ -52,7 +52,7 @@ function copy_special {
         done
     }
 
-    cd ${OLDPWD}
+    cd "${OLDPWD}"
 }
 
 function include {
@@ -113,10 +113,9 @@ if [ ${#machines[@]} -eq 0 ]; then
 	done
 fi
 
-local _i=0
-while [ $_i -lt ${#machines[@]} ]; do
-    machine=`basename "${machines[$_i]}"`
-    _i=$(( $_i+1 ))
+local machine
+for machine in "${machines[@]}"; do
+    machine=`basename "$machine"`
 
     if [ ! -d "${machine}" ]; then
         echo ${machine} does not exist
