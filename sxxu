@@ -21,7 +21,6 @@
 OSREV=$(uname -r| sed 's/\.//g')
 SRCDIR=`pwd`
 COMMONDIR=common
-WRKDIR=`mktemp -d`
 RELEASEDIR=/tmp
 INSTALL_SITE=install.siteXX
 
@@ -81,13 +80,19 @@ function include {
     if [ -d "$_siteXX_src" ]; then
         copy_special "$_siteXX_src" "$_siteXX_dst"
 
-        if [ -e "${_siteXX_src}/mtree" ]; then
-            mtree -Uep "${WRKINST}" < "${_siteXX_src}/mtree"
+        if [ -z "$REGEN_MTREE" -a -e "${_siteXX_src}/mtree" ]; then
+            mtree -Uep "${WRKINST}" < "${_siteXX_src}/mtree" > /dev/null
+
+            local _mtree_out=`mktemp`
+            mtree -ep "${WRKINST}" < "${_siteXX_src}/mtree"  > $_mtree_out
+            if [ $? -ne 0 ]; then
+                echo "\nMTREE PROBLEMS FOUND"
+                cat $_mtree_out
+            fi
+            rm -f $_mtree_out
         fi
 
-        if [ X"NORECURSE" != X"" ]; then
-            return
-        fi
+        [ -z "$NORECURSE" ] || return
 
         if [ -e "${_siteXX_src}/roles" ]; then
             local _role
@@ -116,10 +121,13 @@ for _cfg in .siteXXrc ~/.siteXXrc /etc/siteXX.conf; do
     [ -e $_cfg ] && . $_cfg && break
 done
 
-while getopts mkw: arg; do
+while getopts mkw:R arg; do
     case ${arg} in 
     m)
         REGEN_MTREE=1
+        NORECURSE=1
+    ;;
+    R)
         NORECURSE=1
     ;;
     k)
@@ -129,8 +137,14 @@ while getopts mkw: arg; do
         WRKDIR=${OPTARG}
     esac
 done
+shift $(($OPTIND - 1))
 
-set -A machines "$@"
+if [ -z "$WRKDIR" ]; then
+    WRKDIR=`mktemp -d -t sxxu.XXXXXXXXX` || exit 1
+fi
+
+
+set -A machines -- "$@"
 if [ ${#machines[@]} -eq 0 ]; then
     local _i=0
     local _d
@@ -146,7 +160,7 @@ fi
 
 local machine
 for machine in "${machines[@]}"; do
-    machine=`basename "$machine"`
+    machine=`basename -- "$machine"`
 
     if [ ! -d "${machine}" ]; then
         echo ${machine} does not exist
@@ -169,7 +183,7 @@ for machine in "${machines[@]}"; do
         echo -n "\n regenerate mtree"
         mkdir -p "${SRCDIR}/${machine}/siteXX"
         mtree -cp "${WRKINST}" -k uid,gid,mode > "${SRCDIR}/${machine}/siteXX/mtree"
-    else 
+    elif [ -z "$NORECURSE" ]; then
         if [ X"${machine}" != X"${COMMONDIR}" \
             -a -d "${SRCDIR}/${COMMONDIR}" ]; then
             include $COMMONDIR
@@ -187,6 +201,6 @@ for machine in "${machines[@]}"; do
     echo ' . . . done'
 done
 
-if [ -s "$NOREMOVE" ]; then
+if [ -z "$NOREMOVE" ]; then
     rm -rf $WRKDIR
 fi
