@@ -1,0 +1,39 @@
+#!/bin/sh
+# $Id$
+
+# Copyright (c) 2010 Andrew Fresh <andrew@afresh1.com>
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+# based on (and some parts taken from) siteXXtools/install.site
+# Copyright (c) 2006 Alex Holst <a@mongers.org>
+
+echo XXX THIS IS NOT IN ANY WAY SHAPE OR FORM COMPLETE XXX
+exit
+
+user_add_args="-gid =uid" # Could be in .siteXYrc
+
+for _f in /var/siteXX/*/siteXXrc; do
+    . "$_f"
+done
+
+for _f in /var/siteXX/*/*_list; do
+    local _cmd=`basename "${_f%_list}"`
+    local _args=`eval echo \\${${_cmd}_args}`
+    echo Running $_cmd $_args
+    local _line
+    while read _line; do
+        ${_cmd} ${_args} ${_line}
+    done < $f
+done
+
