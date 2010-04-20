@@ -8,15 +8,15 @@ WRKDIR=`mktemp -d`
 RELEASEDIR=/tmp
 
 function copy_special {
-    local _src=$1
-    local _dst=$2
+    local _src="$1"
+    local _dst="$2"
 
     if [ ! -d "$_src" ]; then
         echo "$_src does not exist!"
         return
     fi
     
-    cd $_src
+    cd "$_src"
     find . \( \
         -path './siteXX' \
         -o -name 'CVS' \
@@ -38,13 +38,13 @@ function copy_special {
 }
 
 function populate_from {
-    local _src=$1
+    local _src="$1"
 
     if [ X"${_src}" == X"" ]; then
         echo "populate_from <dir>"
         return
     fi
-    if [ ! -d ${SRCDIR}/${_src} ]; then
+    if [ ! -d "${SRCDIR}/${_src}" ]; then
         return
     fi
 
@@ -52,10 +52,10 @@ function populate_from {
 
     copy_special "${SRCDIR}/${_src}" "${WRKINST}"
 
-    if [ -d ${SRCDIR}/${_src}/siteXX ]; then
+    if [ -d "${SRCDIR}/${_src}/siteXX" ]; then
         copy_special "${SRCDIR}/${_src}/siteXX" "${WRKINST}/var/siteXX/${_src}"
 
-        if [ -e ${SRCDIR}/${_src}/siteXX/roles ]; then
+        if [ -e "${SRCDIR}/${_src}/siteXX/roles" ]; then
             local _role
             while read _role; do
                 populate_from $_role
@@ -66,41 +66,47 @@ function populate_from {
 
 cd ${SRCDIR}
 
-machines=$*
-if [ X"${machines}" == X"" ]; then
-	local _d
-	for _d in *; do
-        [ ${_d#role-} != "$_d" ] && continue
-		machines="${machines} ${_d}"
+set -A machines "$@"
+if [ ${#machines[@]} -eq 0 ]; then
+    local _i=0
+    local _d
+    for _d in *; do
+        [ ! -d "$_d" ] && continue
+        [ "${_d#role-}" != "$_d" ] && continue
+		machines[$_i]="${_d}"
+        _i=$((_i+1))
 	done
 fi
 
-for machine in ${machines} ; do
-    machine=`basename ${machine}`
-    if [ ! -d ${machine} ]; then
+local _i=0
+while [ $_i -lt ${#machines[@]} ]; do
+    machine=`basename "${machines[$_i]}"`
+    _i=$(( $_i+1 ))
+
+    if [ ! -d "${machine}" ]; then
         echo ${machine} does not exist
         continue
     fi
-        
+
 	local _site=site${OSREV}
 	if [ X"${machine}" != X"${COMMONDIR}" ]; then
-        _site=${_site}-${machine}
+        _site="${_site}-${machine}"
     fi
 
     echo -n populating:
 
-    WRKINST=${WRKDIR}/${_site}
+    WRKINST="${WRKDIR}/${_site}"
 
-    populate_from ${machine}
+    populate_from "${machine}"
 
     if [ X"${machine}" != X"${COMMONDIR}" \
-        -a -d ${SRCDIR}/${COMMONDIR} ]; then
+        -a -d "${SRCDIR}/${COMMONDIR}" ]; then
         populate_from $COMMONDIR
     fi
 
-    local _tgz=${RELEASEDIR}/${_site}.tgz
+    local _tgz="${RELEASEDIR}/${_site}.tgz"
     echo -n "\n  creating $_tgz"
-	tar -cz -C ${WRKINST} -f $_tgz .
+	tar -cz -C "${WRKINST}" -f "$_tgz" .
     echo ' . . . done'
 done
 
