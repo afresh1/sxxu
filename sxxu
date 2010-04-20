@@ -68,7 +68,11 @@ function include {
     local _siteXX_src="${SRCDIR}/${_src}/siteXX"
     local _siteXX_dst="${WRKINST}/var/siteXX/${_src}"
     if [ -d "$_siteXX_dst" ]; then
-        echo -n " !!!${_src}!!!"
+        if [ -z "$REGEN_MTREE" ]; then
+            echo -n " !!!${_src}!!!"
+        else
+            echo -n " ${_src}"
+        fi
         return
     fi
     mkdir -p "$_siteXX_dst"
