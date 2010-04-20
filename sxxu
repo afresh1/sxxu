@@ -33,20 +33,27 @@ do_pre() {
     if [ ${#MACHINES[@]} -eq 0 ]; then
         local _d
         for _d in *; do
-            [ ! -d "$_d" ] && continue
+            [ ! -d "${_d}" ] && continue
+            [ ! -e "${_d}/siteXX" ] && continue
+
             [ -z "${NORECURSE}" -a "${_d#role-}" != "$_d" ] && continue
+
             MACHINES[${#MACHINES[@]}]="${_d}"
         done
     fi
 
     if [ -z "${INSTALL_SITE}" ]; then
+        local _dirname=`dirname $0`
         for INSTALL_SITE in \
             "${SRCDIR}/install.sxxu" \
             "${SRCDIR}/install.siteXX" \
             "${SRCDIR}/install.site" \
             "${SAMPLE_DIR}/install.sxxu" \
             "${SAMPLE_DIR}/install.siteXX" \
-            "${SAMPLE_DIR}/install.site" 
+            "${SAMPLE_DIR}/install.site" \
+            "${_dirname}/install.sxxu" \
+            "${_dirname}/install.siteXX" \
+            "${_dirname}/install.site" 
         do
             [ -e "$INSTALL_SITE" ] && break
         done
@@ -86,7 +93,7 @@ do_loop() {
 
         if [ -z "${NORECURSE}" -o ! -e "${WRKINST}" ]; then
             mkdir -p "${WRKINST}/var/siteXX"
-            echo -n "\n ==>  including:"
+            echo -n "\n ==> including:"
 
             if [ -z "$NORECURSE" ]; then
                 if [ -e "${CONFIG_FILE}" ]; then
@@ -121,7 +128,7 @@ do_loop() {
 
         if [ -z "$NOGZIP" ]; then
             local _tgz="${RELEASEDIR}/${_site}.tgz"
-            echo -n "\n ==>   creating: $_tgz"
+            echo -n "\n ==> creating: $_tgz"
             tar -cz -C "${WRKINST}" -f "$_tgz" .
         fi
 
@@ -150,8 +157,7 @@ copy_special() {
         -o -name 'CVS' \
         -o -name '.git' \
         -o -name '.svn' \
-        \) -prune -o -print \
-    | {
+    \) -prune -o -print | {
         local _file
         while read _file ; do
             if [ -d "$_file" ]; then
@@ -179,7 +185,7 @@ include() {
     local _siteXX_src="${SRCDIR}/${_src}/siteXX"
     local _siteXX_dst="${WRKINST}/var/siteXX/${_src}"
     if [ -d "$_siteXX_dst" ]; then
-        echo -n " !!!${_src}!!!"
+        #echo -n "\n* =>     ${_src}"
         return
     fi
     mkdir -p "$_siteXX_dst"
@@ -202,7 +208,7 @@ include() {
         copy_special "$_siteXX_src" "$_siteXX_dst"
     fi
 
-    echo -n " $_src"
+    echo -n "\n  =>     $_src"
     echo "$_src" > "${WRKINST}/var/siteXX/roles"
     copy_special "${SRCDIR}/${_src}" "${WRKINST}"
 
