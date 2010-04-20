@@ -230,7 +230,7 @@ usage() {
     echo "usage: ${0##*/} [-kmR] [-w WRKDIR]  [machine1 [machine2 [...]]]" >&2
 }
 
-for CONFIG_FILE in "${SRCDIR}/.siteXXrc" ~/.siteXXrc /etc/siteXX.conf; do
+for CONFIG_FILE in "${SRCDIR}/siteXXrc" ~/.siteXXrc /etc/siteXX.conf; do
     [ -e "$CONFIG_FILE" ] && . "$CONFIG_FILE" && break
 done
 
