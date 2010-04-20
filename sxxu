@@ -186,10 +186,17 @@ include() {
     
     if [ -d "$_siteXX_src" ]; then
         if [ -z "${NORECURSE}" -a -e "${_siteXX_src}/roles" ]; then
+            local _roles
+            set -A _roles
+
             local _role
             while read _role; do
-                include "$_role"
+                _roles[${#_roles[@]}]="$_role"
             done < "${_siteXX_src}/roles"
+
+            for _role in "${_roles[@]}"; do
+                include "$_role"
+            done
         fi
 
         copy_special "$_siteXX_src" "$_siteXX_dst"
