@@ -23,6 +23,7 @@ SRCDIR=`pwd`
 COMMONDIR=common
 WRKDIR=`mktemp -d`
 RELEASEDIR=/tmp
+INSTALL_SITE=install.siteXX
 
 function copy_special {
     local _src="$1"
@@ -83,6 +84,17 @@ function include {
 
 cd ${SRCDIR}
 
+for _INSTALL_SITE in \
+    install.site \
+    "${SAMPLE_DIR}/install.siteXX" \
+    "${SAMPLE_DIR}/install.site" 
+do
+    if [ -e "$_INSTALL_SITE" ]; then
+        INSTALL_SITE="$_INSTALL_SITE" 
+        break
+    fi
+done
+
 local _cfg
 for _cfg in .siteXXrc ~/.siteXXrc /etc/siteXX.conf; do
     [ -e $_cfg ] && . $_cfg && break
@@ -125,6 +137,10 @@ while [ $_i -lt ${#machines[@]} ]; do
     if [ X"${machine}" != X"${COMMONDIR}" \
         -a -d "${SRCDIR}/${COMMONDIR}" ]; then
         include $COMMONDIR
+    fi
+
+    if [ -e "${INSTALL_SITE}" ]; then
+        cp ${INSTALL_SITE} "$WRKINST/install.site"
     fi
 
     local _tgz="${RELEASEDIR}/${_site}.tgz"
