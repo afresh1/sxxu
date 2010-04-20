@@ -41,8 +41,10 @@ do_pre() {
 
     if [ -z "${INSTALL_SITE}" ]; then
         for INSTALL_SITE in \
+            "${SRCDIR}/install.sxxu" \
             "${SRCDIR}/install.siteXX" \
             "${SRCDIR}/install.site" \
+            "${SAMPLE_DIR}/install.sxxu" \
             "${SAMPLE_DIR}/install.siteXX" \
             "${SAMPLE_DIR}/install.site" 
         do

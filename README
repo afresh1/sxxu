@@ -40,9 +40,9 @@ Any of the directory structure not in the siteXX directory is treated as a
 normal siteXX that will extract to the root of your system after the install.  
 
 Special files are kept in the siteXX directories.  These special files are
-processed by the install.siteXX after install.
+processed by the install.sxxu after install.
 
-If a role/install.site exists, this WILL overwrite the install.siteXX that
+If a role/install.site exists, this WILL overwrite the install.sxxu that
 would have processed these special files.
 
 Create a directory structure for your system:
