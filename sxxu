@@ -92,7 +92,8 @@ do_loop() {
         WRKINST="${WRKDIR}/${_site}"
 
         if [ -z "${NORECURSE}" -o ! -e "${WRKINST}" ]; then
-            mkdir -p "${WRKINST}/var/siteXX"
+            mkdir -p  "${WRKINST}/var/siteXX"
+            echo '' > "${WRKINST}/var/siteXX/roles"
             echo -n "\n ==> including:"
 
             if [ -z "$NORECURSE" ]; then
