@@ -50,8 +50,8 @@ do_pre() {
         done
     fi
 
+    [ -e "${CONFIG_FILE}" ] && echo "Read config from ${CONFIG_FILE}"
     echo "===> Running ${0##*/} with the following settings:"
-    [ -e "${CONFIG_FILE}" ] && echo " Reading config from ${CONFIG_FILE}\n"
     echo " SRCDIR: ${SRCDIR}"
     echo " WRKDIR: ${WRKDIR}"
     echo " OSREV:  ${OSREV}"
@@ -78,18 +78,18 @@ do_loop() {
             _site="${_site}-${_machine}"
         fi
 
-        echo -n "===> populating: $_site"
+        echo -n "===> processing: $_site"
 
         WRKINST="${WRKDIR}/${_site}"
 
         if [ -z "${NORECURSE}" -o ! -e "${WRKINST}" ]; then
-            mkdir -p "${WRKINST}"
+            mkdir -p "${WRKINST}/var/siteXX"
             echo -n "\n ==>  including:"
 
             if [ -z "$NORECURSE" ]; then
                 if [ -e "${CONFIG_FILE}" ]; then
                     echo -n ' siteXXrc'
-                    cp ${CONFIG_FILE} "$WRKINST/siteXX/siteXXrc"
+                    cp ${CONFIG_FILE} "$WRKINST/var/siteXX/siteXXrc"
                 fi
 
                 if [ -e "${INSTALL_SITE}" ]; then
@@ -107,11 +107,13 @@ do_loop() {
         fi
 
         if [ -n "${REGEN_MTREE}" ]; then
+            mkdir -p "${SRCDIR}/${_machine}/siteXX" \
+                "${WRKINST}/var/siteXX/${_machine}"
+
             local _mtree="${SRCDIR}/${_machine}/siteXX/mtree"
             echo -n "\n ==> regenerate: ${_mtree#${SRCDIR}/}"
 
-            mkdir -p "${SRCDIR}/${_machine}/siteXX" \
-                "${WRKINST}/var/siteXX/${_machine}"
+            [ -e "${_mtree}" ] && mv -f "${_mtree}" "${_mtree}.old"
             mtree -cp "${WRKINST}" -k uid,gid,mode > "$_mtree"
         fi
 
@@ -189,23 +191,24 @@ include() {
         fi
 
         copy_special "$_siteXX_src" "$_siteXX_dst"
-
-        if [ -z "${REGEN_MTREE}" -a -e "${_siteXX_src}/mtree" ]; then
-            mtree -Uep "${WRKINST}" < "${_siteXX_src}/mtree" > /dev/null
-
-            local _mtree_out=`mktemp`
-            mtree -ep "${WRKINST}" < "${_siteXX_src}/mtree"  > $_mtree_out
-            if [ $? -ne 0 ]; then
-                echo "\nMTREE PROBLEMS"
-                cat $_mtree_out
-            fi
-            rm -f $_mtree_out
-        fi
-
     fi
 
     echo -n " $_src"
+    echo "$_src" > "${WRKINST}/var/siteXX/roles"
     copy_special "${SRCDIR}/${_src}" "${WRKINST}"
+
+    if [ -e "${_siteXX_src}/mtree" ]; then
+        echo -n ' (mtree)'
+        mtree -Uep "${WRKINST}" < "${_siteXX_src}/mtree" > /dev/null
+
+        local _mtree_out=`mktemp`
+        mtree -ep "${WRKINST}" < "${_siteXX_src}/mtree"  > $_mtree_out
+        if [ $? -ne 0 ]; then
+            echo "\nMTREE PROBLEMS"
+            cat $_mtree_out
+        fi
+        rm -f $_mtree_out
+    fi
 }
 
 usage() {
