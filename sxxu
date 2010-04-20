@@ -66,17 +66,24 @@ function include {
         return
     fi
 
+    local _role_dir="${WRKINST}/var/siteXX/${_src}"
+    if [ -d "$_role_dir" ]; then
+        echo -n " !!!${_src}!!!"
+        return
+    fi
+    mkdir -p "$_role_dir"
+    
     echo -n " $_src"
 
     copy_special "${SRCDIR}/${_src}" "${WRKINST}"
 
     if [ -d "${SRCDIR}/${_src}/siteXX" ]; then
-        copy_special "${SRCDIR}/${_src}/siteXX" "${WRKINST}/var/siteXX/${_src}"
+        copy_special "${SRCDIR}/${_src}/siteXX" "$_role_dir"
 
         if [ -e "${SRCDIR}/${_src}/siteXX/roles" ]; then
             local _role
             while read _role; do
-                include $_role
+                include "$_role"
             done < "${SRCDIR}/${_src}/siteXX/roles"
         fi
     fi
