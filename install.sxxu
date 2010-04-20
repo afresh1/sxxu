@@ -120,18 +120,20 @@ apply_role() {
 
     local _oldpwd="${PWD}"
     cd "${_role}"
+    local _rolepwd="${PWD}"
 
     if [ -e siteXXrc ]; then
         echo ' ==> Including siteXXrc'
         . siteXXrc
     fi
 
-    append_pkg_path
-    run_command_lists
-    apply_patches
-    install_packages
+    cd "${_rolepwd}" && append_pkg_path
+    cd "${_rolepwd}" && run_command_lists
+    cd "${_rolepwd}" && apply_patches
+    cd "${_rolepwd}" && install_packages
 
     if [ -e install.site ]; then
+        cd "${_rolepwd}"
         if [ -x install.site ]; then
             echo ' ==> Running install.site'
             ./install.site
