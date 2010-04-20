@@ -68,11 +68,7 @@ function include {
     local _siteXX_src="${SRCDIR}/${_src}/siteXX"
     local _siteXX_dst="${WRKINST}/var/siteXX/${_src}"
     if [ -d "$_siteXX_dst" ]; then
-        if [ -z "$REGEN_MTREE" ]; then
-            echo -n " !!!${_src}!!!"
-        else
-            echo -n " ${_src}"
-        fi
+        echo -n " !!!${_src}!!!"
         return
     fi
     mkdir -p "$_siteXX_dst"
@@ -130,9 +126,11 @@ while getopts mkw:R arg; do
     m)
         REGEN_MTREE=1
         NORECURSE=1
+        NOGZIP=1
     ;;
     R)
         NORECURSE=1
+        NOGZIP=1
     ;;
     k)
         NOREMOVE=1
@@ -147,6 +145,10 @@ if [ -z "$WRKDIR" ]; then
     WRKDIR=`mktemp -d -t sxxu.XXXXXXXXX` || exit 1
 fi
 
+echo WRKDIR: $WRKDIR
+[ -z "$REGEN_MTREE" ] || echo Regenerate mtree
+echo '#*#*#*#'
+
 
 set -A machines -- "$@"
 if [ ${#machines[@]} -eq 0 ]; then
@@ -154,9 +156,7 @@ if [ ${#machines[@]} -eq 0 ]; then
     local _d
     for _d in *; do
         [ ! -d "$_d" ] && continue
-        if [ -z "${REGEN_MTREE}" ]; then
-            [ "${_d#role-}" != "$_d" ] && continue
-        fi
+        [ -z "${NORECURSE}" -a "${_d#role-}" != "$_d" ] && continue
 		machines[$_i]="${_d}"
         _i=$((_i+1))
 	done
@@ -176,18 +176,16 @@ for machine in "${machines[@]}"; do
         _site="${_site}-${machine}"
     fi
 
-    echo populating: $_site
+    echo -n populating: $_site
 
     WRKINST="${WRKDIR}/${_site}"
 
-    echo -n ' including:'
-    include "${machine}"
+    if [ -z "${REGEN_MTREE}" -o ! -e "${WRKINST}" ]; then
+        echo -n "\n including:"
+        include "${machine}"
+    fi
 
-    if [ ! -z "${REGEN_MTREE}" ]; then
-        echo -n "\n regenerate mtree"
-        mkdir -p "${SRCDIR}/${machine}/siteXX"
-        mtree -cp "${WRKINST}" -k uid,gid,mode > "${SRCDIR}/${machine}/siteXX/mtree"
-    elif [ -z "$NORECURSE" ]; then
+    if [ -z "$NORECURSE" ]; then
         if [ X"${machine}" != X"${COMMONDIR}" \
             -a -d "${SRCDIR}/${COMMONDIR}" ]; then
             include $COMMONDIR
@@ -196,12 +194,23 @@ for machine in "${machines[@]}"; do
         if [ -e "${INSTALL_SITE}" ]; then
             cp ${INSTALL_SITE} "$WRKINST/install.site"
         fi
+    fi
 
+    if [ ! -z "${REGEN_MTREE}" ]; then
+        local _mtree="${SRCDIR}/${machine}/siteXX/mtree"
+        echo -n "\nregenerate: ${_mtree#${SRCDIR}/}"
+
+        mkdir -p "${SRCDIR}/${machine}/siteXX" \
+            "${WRKINST}/var/siteXX/${machine}"
+        mtree -cp "${WRKINST}" -k uid,gid,mode > "$_mtree"
+    fi
+
+    if [ -z "$NOGZIP" ]; then
         local _tgz="${RELEASEDIR}/${_site}.tgz"
         echo -n "\n  creating: $_tgz"
         tar -cz -C "${WRKINST}" -f "$_tgz" .
-    
     fi
+
     echo ' . . . done'
 done
 
