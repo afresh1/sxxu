@@ -1,6 +1,7 @@
-#!/bin/sh
+#!/bin/ksh -
+#
 # $Id$
-
+#
 # Copyright (c) 2010 Andrew Fresh <andrew@afresh1.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -82,19 +83,22 @@ do_loop() {
         WRKINST="${WRKDIR}/${_site}"
 
         if [ -z "${NORECURSE}" -o ! -e "${WRKINST}" ]; then
+            mkdir -p "${WRKINST}"
             echo -n "\n ==>  including:"
+
+            if [ -z "$NORECURSE" ]; then
+                if [ -e "${INSTALL_SITE}" ]; then
+                    echo -n ' install.site'
+                    cp ${INSTALL_SITE} "$WRKINST/install.site"
+                fi
+
+                if [ X"${_machine}" != X"${COMMONDIR}" \
+                    -a -d "${SRCDIR}/${COMMONDIR}" ]; then
+                    include $COMMONDIR
+                fi
+            fi
+
             include "${_machine}"
-        fi
-
-        if [ -z "$NORECURSE" ]; then
-            if [ X"${_machine}" != X"${COMMONDIR}" \
-                -a -d "${SRCDIR}/${COMMONDIR}" ]; then
-                include $COMMONDIR
-            fi
-
-            if [ -e "${INSTALL_SITE}" ]; then
-                cp ${INSTALL_SITE} "$WRKINST/install.site"
-            fi
         fi
 
         if [ -n "${REGEN_MTREE}" ]; then
@@ -171,11 +175,14 @@ include() {
     fi
     mkdir -p "$_siteXX_dst"
     
-    echo -n " $_src"
-
-    copy_special "${SRCDIR}/${_src}" "${WRKINST}"
-
     if [ -d "$_siteXX_src" ]; then
+        if [ -z "${NORECURSE}" -a -e "${_siteXX_src}/roles" ]; then
+            local _role
+            while read _role; do
+                include "$_role"
+            done < "${_siteXX_src}/roles"
+        fi
+
         copy_special "$_siteXX_src" "$_siteXX_dst"
 
         if [ -z "${REGEN_MTREE}" -a -e "${_siteXX_src}/mtree" ]; then
@@ -190,15 +197,10 @@ include() {
             rm -f $_mtree_out
         fi
 
-        [ -n "${NORECURSE}" ] && return
-
-        if [ -e "${_siteXX_src}/roles" ]; then
-            local _role
-            while read _role; do
-                include "$_role"
-            done < "${_siteXX_src}/roles"
-        fi
     fi
+
+    echo -n " $_src"
+    copy_special "${SRCDIR}/${_src}" "${WRKINST}"
 }
 
 usage() {
