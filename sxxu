@@ -22,36 +22,52 @@ OSREV=$(uname -r| sed 's/\.//g')
 SRCDIR=`pwd`
 COMMONDIR=common
 RELEASEDIR=/tmp
-INSTALL_SITE=install.siteXX
 
 do_pre() {
     if [ -z "$WRKDIR" ]; then
         WRKDIR=`mktemp -d -t sxxu.XXXXXXXXX` || exit 1
     fi
 
-    set -A MACHINES -- "$@"
+    cd ${SRCDIR}
     if [ ${#MACHINES[@]} -eq 0 ]; then
-        local _i=0
         local _d
         for _d in *; do
             [ ! -d "$_d" ] && continue
             [ -z "${NORECURSE}" -a "${_d#role-}" != "$_d" ] && continue
-            MACHINES[$_i]="${_d}"
-            _i=$((_i+1))
+            MACHINES[${#MACHINES[@]}]="${_d}"
         done
     fi
 
-    echo WRKDIR: $WRKDIR
-    [ -z "$REGEN_MTREE" ] || echo Regenerate mtree
-    echo '#*#*#*#'
+    if [ -z "${INSTALL_SITE}" ]; then
+        for INSTALL_SITE in \
+            "${SRCDIR}/install.siteXX" \
+            "${SRCDIR}/install.site" \
+            "${SAMPLE_DIR}/install.siteXX" \
+            "${SAMPLE_DIR}/install.site" 
+        do
+            [ -e "$INSTALL_SITE" ] && break
+        done
+    fi
+
+    echo "===> Running ${0##*/} with the following settings:"
+    [ -e "${CONFIG_FILE}" ] && echo " Reading config from ${CONFIG_FILE}\n"
+    echo " SRCDIR: ${SRCDIR}"
+    echo " WRKDIR: ${WRKDIR}"
+    echo " OSREV:  ${OSREV}"
+    echo ''
+    echo " COMMONDIR:  ${COMMONDIR}"
+    echo " RELEASEDIR: ${RELEASEDIR}"
+    [ -e "${INSTALL_SITE}" ] && echo " install.site source: ${INSTALL_SITE}"
+    [ -n "${REGEN_MTREE}" ]  && echo " Regenerating mtree files"
 }
 
 do_loop() {
+
     local _machine
     for _machine in "${MACHINES[@]}"; do
-        machine=`basename -- "$machine"`
+        _machine=`basename -- "${_machine}"`
 
-        if [ ! -d "${_machine}" ]; then
+        if [ ! -d "${SRCDIR}/${_machine}" ]; then
             echo ${_machine} does not exist
             continue
         fi
@@ -61,12 +77,12 @@ do_loop() {
             _site="${_site}-${_machine}"
         fi
 
-        echo -n populating: $_site
+        echo -n "===> populating: $_site"
 
         WRKINST="${WRKDIR}/${_site}"
 
-        if [ -z "${REGEN_MTREE}" -o ! -e "${WRKINST}" ]; then
-            echo -n "\n including:"
+        if [ -z "${NORECURSE}" -o ! -e "${WRKINST}" ]; then
+            echo -n "\n ==>  including:"
             include "${_machine}"
         fi
 
@@ -81,9 +97,9 @@ do_loop() {
             fi
         fi
 
-        if [ ! -z "${REGEN_MTREE}" ]; then
+        if [ -n "${REGEN_MTREE}" ]; then
             local _mtree="${SRCDIR}/${_machine}/siteXX/mtree"
-            echo -n "\nregenerate: ${_mtree#${SRCDIR}/}"
+            echo -n "\n ==> regenerate: ${_mtree#${SRCDIR}/}"
 
             mkdir -p "${SRCDIR}/${_machine}/siteXX" \
                 "${WRKINST}/var/siteXX/${_machine}"
@@ -92,7 +108,7 @@ do_loop() {
 
         if [ -z "$NOGZIP" ]; then
             local _tgz="${RELEASEDIR}/${_site}.tgz"
-            echo -n "\n  creating: $_tgz"
+            echo -n "\n ==>   creating: $_tgz"
             tar -cz -C "${WRKINST}" -f "$_tgz" .
         fi
 
@@ -174,7 +190,7 @@ include() {
             rm -f $_mtree_out
         fi
 
-        [ -z "${NORECURSE}" ] || return
+        [ -n "${NORECURSE}" ] && return
 
         if [ -e "${_siteXX_src}/roles" ]; then
             local _role
@@ -189,22 +205,8 @@ usage() {
     echo "usage: ${0##*/} [-kmR] [-w WRKDIR]  [machine1 [machine2 [...]]]" >&2
 }
 
-cd ${SRCDIR}
-
-for _INSTALL_SITE in \
-    install.site \
-    "${SAMPLE_DIR}/install.siteXX" \
-    "${SAMPLE_DIR}/install.site" 
-do
-    if [ -e "$_INSTALL_SITE" ]; then
-        INSTALL_SITE="$_INSTALL_SITE" 
-        break
-    fi
-done
-
-local _cfg
-for _cfg in .siteXXrc ~/.siteXXrc /etc/siteXX.conf; do
-    [ -e $_cfg ] && . $_cfg && break
+for CONFIG_FILE in "${SRCDIR}/.siteXXrc" ~/.siteXXrc /etc/siteXX.conf; do
+    [ -e "$CONFIG_FILE" ] && . "$CONFIG_FILE" && break
 done
 
 while getopts :kmw:R arg; do
@@ -232,6 +234,8 @@ while getopts :kmw:R arg; do
     esac
 done
 shift $(($OPTIND - 1))
+
+set -A MACHINES -- "$@"
 
 do_pre
 do_loop
