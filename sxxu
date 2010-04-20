@@ -128,7 +128,8 @@ while [ $_i -lt ${#machines[@]} ]; do
         _site="${_site}-${machine}"
     fi
 
-    echo -n populating:
+    echo populating: $_site
+    echo -n ' including:'
 
     WRKINST="${WRKDIR}/${_site}"
 
