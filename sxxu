@@ -54,11 +54,11 @@ function copy_special {
     cd ${OLDPWD}
 }
 
-function populate_from {
+function include {
     local _src="$1"
 
     if [ X"${_src}" == X"" ]; then
-        echo "populate_from <dir>"
+        echo "include <dir>"
         return
     fi
     if [ ! -d "${SRCDIR}/${_src}" ]; then
@@ -75,7 +75,7 @@ function populate_from {
         if [ -e "${SRCDIR}/${_src}/siteXX/roles" ]; then
             local _role
             while read _role; do
-                populate_from $_role
+                include $_role
             done < "${SRCDIR}/${_src}/siteXX/roles"
         fi
     fi
@@ -114,15 +114,15 @@ while [ $_i -lt ${#machines[@]} ]; do
 
     WRKINST="${WRKDIR}/${_site}"
 
-    populate_from "${machine}"
+    include "${machine}"
 
     if [ X"${machine}" != X"${COMMONDIR}" \
         -a -d "${SRCDIR}/${COMMONDIR}" ]; then
-        populate_from $COMMONDIR
+        include $COMMONDIR
     fi
 
     local _tgz="${RELEASEDIR}/${_site}.tgz"
-    echo -n "\n  creating $_tgz"
+    echo -n "\n  creating: $_tgz"
 	tar -cz -C "${WRKINST}" -f "$_tgz" .
     echo ' . . . done'
 done
