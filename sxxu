@@ -209,7 +209,7 @@ include() {
     fi
 
     echo -n "\n  =>     $_src"
-    echo "$_src" > "${WRKINST}/var/siteXX/roles"
+    echo "$_src" >> "${WRKINST}/var/siteXX/roles"
     copy_special "${SRCDIR}/${_src}" "${WRKINST}"
 
     if [ -e "${_siteXX_src}/mtree" ]; then
