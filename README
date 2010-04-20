@@ -1,5 +1,9 @@
 sxxu - siteXX utility - a tool to help build OpenBSD siteXX files
 
+This was inspired by siteXYtools from mongers.org, but it seemed like it
+needed a few additional features to make it easier to do more common tasks.
+
+
 For more information on siteXX files see:
 http://www.openbsd.org/faq/faq4.html#site
 
