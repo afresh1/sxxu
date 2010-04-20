@@ -98,12 +98,12 @@ do_loop() {
             if [ -z "$NORECURSE" ]; then
                 if [ -e "${CONFIG_FILE}" ]; then
                     echo -n ' siteXXrc'
-                    cp ${CONFIG_FILE} "$WRKINST/var/siteXX/siteXXrc"
+                    install -m 644 ${CONFIG_FILE} "$WRKINST/var/siteXX/siteXXrc"
                 fi
 
                 if [ -e "${INSTALL_SITE}" ]; then
                     echo -n ' install.site'
-                    cp ${INSTALL_SITE} "$WRKINST/install.site"
+                    install -m 555 "${INSTALL_SITE}" "${WRKINST}/install.site"
                 fi
 
                 if [ X"${_machine}" != X"${COMMONDIR}" \
