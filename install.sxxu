@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/ksh -
 # $Id$
 
 # Copyright (c) 2010 Andrew Fresh <andrew@afresh1.com>
@@ -18,22 +18,138 @@
 # based on (and some parts taken from) siteXXtools/install.site
 # Copyright (c) 2006 Alex Holst <a@mongers.org>
 
-echo XXX THIS IS NOT IN ANY WAY SHAPE OR FORM COMPLETE XXX
-exit
+BASEDIR=/var/siteXX
+user_add_args="-m -gid =uid"
+[ -e /var/siteXX/siteXXrc ] && . /var/siteXX/siteXXrc
 
-user_add_args="-gid =uid" # Could be in .siteXYrc
+export PKG_PATH
 
-for _f in /var/siteXX/*/siteXXrc; do
-    . "$_f"
-done
+do_pre() {
+    # nothing to do
+}
 
-for _f in /var/siteXX/*/*_list; do
-    local _cmd=`basename "${_f%_list}"`
-    local _args=`eval echo \\${${_cmd}_args}`
-    echo Running $_cmd $_args
+do_post() {
+    # nothing to do
+}
+
+process_roles() {
+    local _oldpwd="${PWD}"
+
+    cd "${BASEDIR}"
+    if [ ! -e roles ]; then
+        echo 'No roles defined.'
+        exit
+    fi
+
+    local _roles
+    set -A _roles
+    local _role
+    while read _role; do
+        _roles[${#_roles[@]}]="$_role"
+    done < roles
+    
+    for _role in "${_roles[@]}"; do
+        apply_role "$_role"
+    done
+
+    cd "${_oldpwd}"
+}
+
+
+append_pkg_path() {
+    [ ! -e pkg_path ] && return
+
+    echo ' ==> Setting PKG_PATH'
     local _line
     while read _line; do
-        ${_cmd} ${_args} ${_line}
-    done < $f
-done
+        if [ -z "${PKG_PATH}" ]; then
+            PKG_PATH="$_line"
+        else
+            PKG_PATH="${PKG_PATH}:${_line}"
+        fi
+    done < pkg_path
+}
 
+run_command_lists() {
+    local _f
+    for _f in *_list; do
+        [ ! -f "${_f}" ] && continue
+
+        local _cmd=`basename "${_f%_list}"`
+        local _args=`eval echo \\${${_cmd}_args}`
+
+        echo " ==> Running $_cmd $_args"
+        local _line
+        while read _line; do
+            echo "  => ${_line}"
+            eval ${_cmd} ${_args} ${_line}
+        done < ${_f}
+    done
+}
+
+apply_patches() {
+    [ ! -d patches ] && return
+
+    echo ' ==> Applying patches'
+    local _p
+    for _p in /patches/*; do
+        echo "  => $_p"
+        # -N Always assume a forward patch.
+        # -t Never prompt; assume the user is expert
+        # -p0 full path, always
+        patch -N -t -p0 < $_p
+    done
+}
+
+install_packages() {
+    [ ! -d packages ] && return
+
+    echo ' ==> Installing packages'
+    find packages -name '*.tgz' -print0 | xargs -0 pkg_add ${pkg_add_args}
+}
+
+apply_role() {
+    local _role="$1"
+
+    if [ ! -d "${_role}" ]; then
+        echo "===> Missing ${_role}"
+        return
+    fi
+
+    echo "===> Applying ${_role}"
+
+    local _oldpwd="${PWD}"
+    cd "${_role}"
+
+    if [ -e siteXXrc ]; then
+        echo ' ==> Including siteXXrc'
+        . siteXXrc
+    fi
+
+    append_pkg_path
+    run_command_lists
+    apply_patches
+    install_packages
+
+    if [ -e install.site ]; then
+        if [ -x install.site ]; then
+            echo ' ==> Running install.site'
+            ./install.site
+        else
+            echo ' ==> Including install.site'
+            . install.site
+        fi
+    fi
+
+    cd "${_oldpwd}"
+}
+
+
+if [ ! -d "${BASEDIR}" ]; then
+    echo Nothing to do.
+    exit
+fi
+
+do_pre
+process_roles
+do_post
