@@ -87,6 +87,11 @@ do_loop() {
             echo -n "\n ==>  including:"
 
             if [ -z "$NORECURSE" ]; then
+                if [ -e "${CONFIG_FILE}" ]; then
+                    echo -n ' siteXXrc'
+                    cp ${CONFIG_FILE} "$WRKINST/siteXX/siteXXrc"
+                fi
+
                 if [ -e "${INSTALL_SITE}" ]; then
                     echo -n ' install.site'
                     cp ${INSTALL_SITE} "$WRKINST/install.site"
