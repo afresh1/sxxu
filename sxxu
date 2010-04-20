@@ -83,6 +83,12 @@ function include {
 
 cd ${SRCDIR}
 
+local _cfg
+for _cfg in .siteXXrc ~/.siteXXrc /etc/siteXX.conf; do
+    [ -e $_cfg ] && . $_cfg && break
+done
+
+
 set -A machines "$@"
 if [ ${#machines[@]} -eq 0 ]; then
     local _i=0
