@@ -19,7 +19,7 @@
 # Copyright (c) 2006 Alex Holst <a@mongers.org>
 
 BASEDIR=/var/siteXX
-user_add_args="-m -gid =uid"
+useradd_args="-m -gid =uid"
 [ -e /var/siteXX/siteXXrc ] && . /var/siteXX/siteXXrc
 
 export PKG_PATH
@@ -45,7 +45,9 @@ process_roles() {
     set -A _roles
     local _role
     while read _role; do
-        _roles[${#_roles[@]}]="$_role"
+	if [ -n "${_role}" ]; then
+        	_roles[${#_roles[@]}]="$_role"
+	fi
     done < roles
     
     for _role in "${_roles[@]}"; do
@@ -68,6 +70,7 @@ append_pkg_path() {
             PKG_PATH="${PKG_PATH}:${_line}"
         fi
     done < pkg_path
+    PKG_PATH=`eval echo $PKG_PATH`
 }
 
 run_command_lists() {
@@ -92,12 +95,12 @@ apply_patches() {
 
     echo ' ==> Applying patches'
     local _p
-    for _p in /patches/*; do
+    for _p in patches/*; do
         echo "  => $_p"
         # -N Always assume a forward patch.
         # -t Never prompt; assume the user is expert
         # -p0 full path, always
-        patch -N -t -p0 < $_p
+        patch -N -t -p0 -d / < $_p
     done
 }
 
