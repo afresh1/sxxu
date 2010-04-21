@@ -114,20 +114,20 @@ install_packages() {
 apply_role() {
     local _role="$1"
 
-    if [ ! -d "${_role}" ]; then
+    local _oldpwd="${PWD}"
+    local _rolepwd="${BASEDIR}/${_role}"
+
+    if [ ! -d "${_rolepwd}" ]; then
         echo "===> Missing ${_role}"
         return
     fi
 
     echo "===> Applying ${_role}"
 
-    local _oldpwd="${PWD}"
-    cd "${_role}"
-    local _rolepwd="${PWD}"
-
-    if [ -e siteXXrc ]; then
+    cd "${_rolepwd}"
+    if [ -e ./siteXXrc ]; then
         echo ' ==> Including siteXXrc'
-        . siteXXrc
+        . ./siteXXrc
     fi
 
     cd "${_rolepwd}" && append_pkg_path
@@ -135,14 +135,14 @@ apply_role() {
     cd "${_rolepwd}" && apply_patches
     cd "${_rolepwd}" && install_packages
 
-    if [ -e install.site ]; then
-        cd "${_rolepwd}"
-        if [ -x install.site ]; then
+    cd "${_rolepwd}"
+    if [ -e ./install.site ]; then
+        if [ -x ./install.site ]; then
             echo ' ==> Running install.site'
             ./install.site
         else
             echo ' ==> Including install.site'
-            . install.site
+            . ./install.site
         fi
     fi
 
