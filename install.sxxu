@@ -25,11 +25,11 @@ useradd_args="-m -gid =uid"
 export PKG_PATH
 
 do_pre() {
-    # nothing to do
+    echo 'Running post install from sxxu'
 }
 
 do_post() {
-    # nothing to do
+    echo 'See /var/log/install.log for install messages.'
 }
 
 process_roles() {
@@ -45,9 +45,9 @@ process_roles() {
     set -A _roles
     local _role
     while read _role; do
-	if [ -n "${_role}" ]; then
-        	_roles[${#_roles[@]}]="$_role"
-	fi
+    if [ -n "${_role}" ]; then
+            _roles[${#_roles[@]}]="$_role"
+    fi
     done < roles
     
     for _role in "${_roles[@]}"; do
@@ -84,7 +84,7 @@ run_command_lists() {
         echo " ==> Running $_cmd $_args"
         local _line
         while read _line; do
-            echo "  => ${_line}"
+            echo "  => ${_cmd} ${_args} ${_line}"
             eval ${_cmd} ${_args} ${_line}
         done < ${_f}
     done
@@ -158,5 +158,4 @@ fi
 
 do_pre        2>&1 | /usr/bin/tee    /var/log/install.log
 process_roles 2>&1 | /usr/bin/tee -a /var/log/install.log | grep '^...>'
-do_post       2>&1 | /usr/bin/tee -a /var/log/install.log | grep '^...>'
-echo See /var/log/install.log for install messages.
+do_post       2>&1 | /usr/bin/tee -a /var/log/install.log
