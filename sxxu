@@ -74,7 +74,7 @@ do_pre() {
 
     set | grep -e '.*DIR' -e 'MACHINES' -e 'OSREV' \
                -e REGEN_MTREE -e NORECURSE -e NOGZIP -e NOREMOVE \
-	> "${WRKDIR}/siteXXrc"
+        > "${WRKDIR}/siteXXrc"
 }
 
 do_loop() {
@@ -193,10 +193,11 @@ include() {
     local _src="$1"
 
     if [ X"${_src}" == X"" ]; then
-        echo "include <dir>"
+        echo "Usage: include <dir>"
         return
     fi
     if [ ! -d "${SRCDIR}/${_src}" ]; then
+        echo -n "\n  => EXTRA ${_src} !!!"
         return
     fi
 
@@ -211,6 +212,7 @@ include() {
     if [ -d "$_siteXX_src" ]; then
         if [ -z "${NORECURSE}" -a -e "${_siteXX_src}/roles" ]; then
             local _roles
+            unset _roles
             set -A _roles
 
             local _role
@@ -226,7 +228,7 @@ include() {
         copy_special "$_siteXX_src" "$_siteXX_dst"
     fi
 
-    echo -n "\n  =>     $_src"
+    echo -n "\n  =>       ${_src}"
     echo "$_src" >> "${WRKINST}/var/siteXX/roles"
     copy_special "${SRCDIR}/${_src}" "${WRKINST}"
 
