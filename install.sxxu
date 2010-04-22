@@ -32,6 +32,22 @@ do_post() {
     echo 'See /var/log/install.log for install messages.'
 }
 
+# Strip comments (and leading/trailing whitespace if IFS is set)
+# from a file and spew to stdout
+stripcom() {
+    local _file="$1"
+    local _line
+
+    {
+        while read _line ; do
+            _line=${_line%%#*}              # strip comments
+            test -z "$_line" && continue
+            echo $_line
+        done
+    } < $_file
+}
+
+
 process_roles() {
     local _oldpwd="${PWD}"
 
@@ -42,13 +58,14 @@ process_roles() {
     fi
 
     local _roles
+    unset _roles
     set -A _roles
     local _role
-    while read _role; do
+    stripcom roles | while read _role; do
     if [ -n "${_role}" ]; then
             _roles[${#_roles[@]}]="$_role"
     fi
-    done < roles
+    done
     
     for _role in "${_roles[@]}"; do
         apply_role "$_role"
@@ -63,13 +80,14 @@ append_pkg_path() {
 
     echo ' ==> Setting PKG_PATH'
     local _line
-    while read _line; do
+    stripcom pkg_path | while read _line; do
         if [ -z "${PKG_PATH}" ]; then
             PKG_PATH="$_line"
         else
             PKG_PATH="${PKG_PATH}:${_line}"
         fi
-    done < pkg_path
+    done
+
     PKG_PATH=`eval echo $PKG_PATH`
 }
 
@@ -83,10 +101,10 @@ run_command_lists() {
 
         echo " ==> Running $_cmd $_args"
         local _line
-        while read _line; do
+        stripcom "${_f}" | while read _line; do
             echo "  => ${_cmd} ${_args} ${_line}"
             eval ${_cmd} ${_args} ${_line}
-        done < ${_f}
+        done
     done
 }
 
@@ -101,7 +119,7 @@ apply_patches() {
         # -N Always assume a forward patch.
         # -t Never prompt; assume the user is expert
         # -p0 full path, always
-        patch -N -t -p0 -d / < $_p
+        patch -N -t -p0 -d / < "$_p"
     done
 }
 
