@@ -25,8 +25,10 @@ COMMONDIR=common
 RELEASEDIR=/tmp
 
 do_pre() {
-    if [ -z "$WRKDIR" ]; then
+    if [ -z "${WRKDIR}" ]; then
         WRKDIR=`mktemp -d -t sxxu.XXXXXXXXX` || exit 1
+    else
+        mkdir -p "${WRKDIR}"
     fi
 
     cd ${SRCDIR}
@@ -69,6 +71,10 @@ do_pre() {
     echo " RELEASEDIR: ${RELEASEDIR}"
     [ -e "${INSTALL_SITE}" ] && echo " install.site source: ${INSTALL_SITE}"
     [ -n "${REGEN_MTREE}" ]  && echo " Regenerating mtree files"
+
+    set | grep -e '.*DIR' -e 'MACHINES' -e 'OSREV' \
+               -e REGEN_MTREE -e NORECURSE -e NOGZIP -e NOREMOVE \
+	> "${WRKDIR}/siteXXrc"
 }
 
 do_loop() {
@@ -135,7 +141,7 @@ do_loop() {
                 mv -f "${_mtree}.new" "${_mtree}"
             fi
 
-	    rm -f ${_mtreetmp}
+            rm -f ${_mtreetmp}
         fi
 
         if [ -z "$NOGZIP" ]; then
@@ -272,7 +278,9 @@ while getopts :kmw:R arg; do
 done
 shift $(($OPTIND - 1))
 
-set -A MACHINES -- "$@"
+if [ -z "${MACHINES[@]}" ]; then
+    set -A MACHINES -- "$@"
+fi
 
 do_pre
 do_loop
