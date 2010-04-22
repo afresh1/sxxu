@@ -96,6 +96,7 @@ apply_patches() {
     echo ' ==> Applying patches'
     local _p
     for _p in patches/*; do
+        [ X"patches/*" == X"${_p}" ] && continue
         echo "  => $_p"
         # -N Always assume a forward patch.
         # -t Never prompt; assume the user is expert
