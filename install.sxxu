@@ -157,5 +157,6 @@ if [ ! -d "${BASEDIR}" ]; then
 fi
 
 do_pre        2>&1 | /usr/bin/tee    /var/log/install.log
-process_roles 2>&1 | /usr/bin/tee -a /var/log/install.log
-do_post       2>&1 | /usr/bin/tee -a /var/log/install.log
+process_roles 2>&1 | /usr/bin/tee -a /var/log/install.log | grep '^...>'
+do_post       2>&1 | /usr/bin/tee -a /var/log/install.log | grep '^...>'
+echo See /var/log/install.log for install messages.
