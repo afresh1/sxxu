@@ -123,8 +123,19 @@ do_loop() {
             local _mtree="${SRCDIR}/${_machine}/siteXX/mtree"
             echo -n "\n ==> regenerate: ${_mtree#${SRCDIR}/}"
 
-            [ -e "${_mtree}" ] && mv -f "${_mtree}" "${_mtree}.old"
-            mtree -cp "${WRKINST}" -k uid,gid,mode > "$_mtree"
+            local _mtreetmp=`mktemp ${WRKDIR}/mtree_old-XXXXXXXXXX`
+            [ -e "${_mtree}" ] && cat "${_mtree}" > "${_mtreetmp}"
+
+            mtree -cp "${WRKINST}" -k uid,gid,mode > "${_mtree}.new"
+
+            if diff -q -I '\#.*tree:' -I '\#.*date:' \
+                "${_mtreetmp}" "${_mtree}.new"; then
+                rm -f "${_mtree}.new"
+            else
+                mv -f "${_mtree}.new" "${_mtree}"
+            fi
+
+	    rm -f ${_mtreetmp}
         fi
 
         if [ -z "$NOGZIP" ]; then
