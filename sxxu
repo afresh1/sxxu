@@ -89,7 +89,7 @@ do_loop() {
 
         echo -n "===> processing: $_site"
 
-        WRKINST="${WRKDIR}/${_site}"
+        WRKINST="${WRKDIR}/${_machine}"
 
         if [ -z "${NORECURSE}" -o ! -e "${WRKINST}" ]; then
             mkdir -p  "${WRKINST}/var/siteXX"
