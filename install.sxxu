@@ -156,6 +156,6 @@ if [ ! -d "${BASEDIR}" ]; then
     exit
 fi
 
-do_pre
-process_roles
-do_post
+do_pre        2>&1 | /usr/bin/tee    /var/log/install.log
+process_roles 2>&1 | /usr/bin/tee -a /var/log/install.log
+do_post       2>&1 | /usr/bin/tee -a /var/log/install.log
