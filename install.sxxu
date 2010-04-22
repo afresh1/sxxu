@@ -123,7 +123,7 @@ apply_role() {
         return
     fi
 
-    echo "===> Applying ${_role}"
+    echo "===> Applying role ${_role}"
 
     cd "${_rolepwd}"
     if [ -e ./siteXXrc ]; then
