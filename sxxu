@@ -134,7 +134,7 @@ do_loop() {
 
             mtree -cp "${WRKINST}" -k uid,gid,mode > "${_mtree}.new"
 
-            if diff -q -I '\#.*tree:' -I '\#.*date:' \
+            if diff -q -I '^\#' \
                 "${_mtreetmp}" "${_mtree}.new"; then
                 rm -f "${_mtree}.new"
             else
