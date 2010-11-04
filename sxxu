@@ -24,11 +24,21 @@ SRCDIR=`pwd`
 COMMONDIR=common
 RELEASEDIR=/tmp
 
+do_post() {
+    if [ -z "$NOREMOVE" -a -e "$WRKDIR" ]; then
+        echo "\n===> Removing $WRKDIR"
+        rm -rf $WRKDIR
+    fi
+}
+
+trap "do_post; exit 1" INT EXIT ERR
+
 do_pre() {
     if [ -z "${WRKDIR}" ]; then
         WRKDIR=`mktemp -d -t sxxu.XXXXXXXXX` || exit 1
     else
         mkdir -p "${WRKDIR}"
+        NOREMOVE=1
     fi
 
     cd ${SRCDIR}
@@ -152,12 +162,6 @@ do_loop() {
 
         echo ' . . . done'
     done
-}
-
-do_post() {
-    if [ -z "$NOREMOVE" ]; then
-        rm -rf $WRKDIR
-    fi
 }
 
 copy_special() {
