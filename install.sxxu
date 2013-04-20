@@ -20,7 +20,7 @@
 
 BASEDIR=/var/siteXX
 useradd_args="-m -gid =uid"
-[ -e /var/siteXX/siteXXrc ] && . /var/siteXX/siteXXrc
+[ -e $BASEDIR/siteXXrc ] && . $BASEDIR/siteXXrc
 
 export PKG_PATH
 
