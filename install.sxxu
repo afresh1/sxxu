@@ -62,21 +62,19 @@ process_roles() {
 
 
 append_pkg_path() {
-    [ ! -e pkg_path ] && return
+    [ -e pkg_path -o -d packages ] || return
 
     echo ' ==> Setting PKG_PATH'
+    [ -d packages ] && PKG_PATH="${PKG_PATH}:${PWD}/packages"
+    [ -e pkg_path ] || return;
     local _line
     while read _line; do
         _line=${_line%%#*}              # strip comments
-        test -z "$_line" && continue
-        if [ -z "${PKG_PATH}" ]; then
-            PKG_PATH="$_line"
-        else
-            PKG_PATH="${PKG_PATH}:${_line}"
-        fi
+        [ -z "$_line" ] && continue
+        PKG_PATH="${PKG_PATH}:${_line}"
     done < pkg_path
 
-    PKG_PATH=`eval echo $PKG_PATH`
+    PKG_PATH=`eval echo $PKG_PATH | sed -e 's/^:*//'`
 }
 
 run_command_lists() {
