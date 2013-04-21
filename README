@@ -1,8 +1,9 @@
-sxxu - siteXX utility - a tool to help build OpenBSD siteXX files
+sxxu - siteXX utility
+=====================
+## a tool to help build OpenBSD siteXX files ##
 
 This was inspired by siteXYtools from mongers.org, but it seemed like it
 needed a few additional features to make it easier to do more common tasks.
-
 
 For more information on siteXX files see:
 http://www.openbsd.org/faq/faq4.html#site
@@ -12,9 +13,9 @@ The goals of sxxu are to help you:
 * Keep configuration for your systems in a source control
 * Recover from a disaster more quickly
 * Do a matching install on a secondary system so you can
-  o Upgrade between versions of OpenBSD with the ability to revert
-  o Replace aging hardware
-  o Build a test environment before pushing changes to a production system
+  * Upgrade between versions of OpenBSD with the ability to revert
+  * Replace aging hardware
+  * Build a test environment before pushing changes to a production system
 
 sxxu is meant to be a simple utility for installing systems.  It does not have
 the ability to continue to push changes out to already installed systems.  For
@@ -26,22 +27,22 @@ Some of the problems sxxu tries to solve:
 * duplication of common configuration for each system
 * permissions easily get broken when configuration is in source control
 
+### USAGE ###
+    sxxu [-kmR] [-w WRKDIR]  [machine1 [machine2 [...]]]
+     -k : Keep WRKDIR
+     -m : rebuild mtree files
+     -R : don't Recurse into Roles
+     -w : specify the WRKDIR
 
-USAGE: sxxu [-kmR] [-w WRKDIR]  [machine1 [machine2 [...]]]
-  -k : Keep WRKDIR
-  -m : rebuild mtree files
-  -R : don't Recurse into Roles
-  -w : specify the WRKDIR
 
-
-DETAILS:
+### DETAILS ###
 
 In the basedir, each directory is considered a "role", the common directory is
 merged into each role by default and any directory named role-* does not
 generate a tgz by default.
 
 Any of the directory structure not in the siteXX directory is treated as a
-normal siteXX that will extract to the root of your system after the install.  
+normal siteXX that will extract to the root of your system after the install.
 
 Special files are kept in the siteXX directories.  These special files are
 processed by the install.sxxu after install.
@@ -51,77 +52,76 @@ would have processed these special files.
 
 Create a directory structure for your system:
 
-basedir/
- |-common
- |---siteXX
- |-machine1
- |---siteXX
- |-machine2
- |---etc
- |---siteXX
- |-role-imap
- |---siteXX
- |---var
- |-----sendmail
-
+    basedir/
+     |-common
+     |---siteXX
+     |-machine1
+     |---siteXX
+     |-machine2
+     |---etc
+     |---siteXX
+     |-role-imap
+     |---siteXX
+     |---var
+     |-----sendmail
 
 Special files and directories inside the siteXX directory:
-    roles: 
-      Contains a list of "roles" (directories in the basedir) to merge into
+  * roles:
+    * Contains a list of "roles" (directories in the basedir) to merge into
       this configuration.  The common directory is automatically included in
       all configurations.
 
-    mtree: 
-      An mtree(8) spec file for permissions on the files in this role. It gets
-      applied before the files are put into the archive. See below for notes
-      on how to create and update.
+  * mtree:
+    * An [mtree(8)](http://www.openbsd.org/cgi-bin/man.cgi?query=mtree&sektion=8)
+      spec file for permissions on the files in this role. It gets
+      applied before the files are put into the archive. See below
+      for notes on how to create and update.
 
-    siteXXrc: xxx
-      A ksh script that is included before running the *_list commands and
-      the individual install.site files for each role.  
+  * siteXXrc:
+    * A ksh script that is included before running the `*_list` commands and
+      the individual `install.site` files for each role.
 
-    pkg_path:
-      A list (one per line) of sites to add to the PKG_PATH environment.
+  * pkg_path:
+    * A list (one per line) of sites to add to the `PKG_PATH` environment.
+      Can also be colon separated the same as a normal `PKG_PATH`.
 
-    *_list:
-      A list of arguments to commands to be run.  For example if pkg_add_list
-      containing "rsync nrpe check_hw_sensors" will attempt to run 
-      pkg_add rsync nrpe check_hw_sensors.
+  * *_list:
+    * A list of arguments to commands to be run.  For example if `pkg_add_list`
+      containing "rsync nrpe check_hw_sensors" will attempt to run
+      `pkg_add rsync nrpe check_hw_sensors`.
 
       The command is executed for each line of the file.
 
       You can set environment variables in the siteXXrc file for arguments.
-      Setting "pkg_add_args='-i'" in a siteXXrc would make the above command
-      pkg_add -i rsync nrpe check_hw_sensors
+      Setting "`pkg_add_args='-i'`" in a siteXXrc would make the above command
+      `pkg_add -i rsync nrpe check_hw_sensors`
 
-    patches/:
-        All patches in this dir need to be relative to the root of the system
-        where the tgz was extracted.
+  * patches/:
+    * All patches in this dir need to be relative to the root of the system
+      where the tgz was extracted.
 
-    packages/:
-        Package files that will get installed.  Completely separate from
-        pkg_add_list above.  It does inherit pkg_path and pkg_add_args.
+  * packages/:
+    * Package files that will get installed.  Completely separate from
+      pkg_add_list above.  It does inherit `pkg_path` and `pkg_add_args`.
 
-    install.site:
-        Your script that gets run after all the above things have been done. 
+  * install.site:
+    * Your script that gets run after all the above things have been done.
 
-MTREE:
+### MTREE ###
 
-You can use sxxu -m to generate mtree spec files.  This will generate the
+You can use `sxxu -m` to generate mtree spec files.  This will generate the
 files with the permissions that are gotten after copying and applying the
-existing mtree file. 
+existing mtree file.
 
 You can get some more advanced features with some other switches.
 
-  # sxxu -kRw /tmp/sxxu-work
+    # sxxu -kRw /tmp/sxxu-work
 
 will extract all roles including those named role-* into /tmp/sxxy-work
 without following the included roles.  At that point you can change
 permissions in the work directory as you see fit, then when you are ready,
 from the place where your source files are you would run
 
-  $ sxxu -mw /tmp/sxxu-work
+    $ sxxu -mw /tmp/sxxu-work
 
 which will regenerate the mtree specs with the permissions you have set.
-
-
