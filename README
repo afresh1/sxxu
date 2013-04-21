@@ -47,45 +47,54 @@ normal siteXX that will extract to the root of your system after the install.
 Special files are kept in the siteXX directories.  These special files are
 processed by the install.sxxu after install.
 
-If a role/install.site exists, this WILL overwrite the install.sxxu that
+If a role/install.site exists, this **WILL** overwrite the `install.sxxu` that
 would have processed these special files.
 
 Create a directory structure for your system:
 
     basedir/
-     |-common
+     |-common/
      |---siteXX
-     |-machine1
-     |---siteXX
-     |-machine2
-     |---etc
-     |---siteXX
-     |-role-imap
-     |---siteXX
-     |---var
-     |-----sendmail
+     |------roles
+     |------mtree
+     |------siteXXrc
+     |------pkg_add_list
+     |------install_list
+     |------patches/
+     |------packages/
+     |------install.site
+     |-machine1/
+     |---siteXX/
+     |-machine2/
+     |---etc/
+     |------my_app.conf
+     |---siteXX/
+     |-role-imap/
+     |---siteXX/
+     |---var/
+     |-----sendmail/
 
 Special files and directories inside the siteXX directory:
-  * roles:
+  * roles
     * Contains a list of "roles" (directories in the basedir) to merge into
       this configuration.  The common directory is automatically included in
       all configurations.
 
-  * mtree:
+  * mtree
     * An [mtree(8)](http://www.openbsd.org/cgi-bin/man.cgi?query=mtree&sektion=8)
       spec file for permissions on the files in this role. It gets
       applied before the files are put into the archive. See below
       for notes on how to create and update.
 
-  * siteXXrc:
+  * siteXXrc
     * A ksh script that is included before running the `*_list` commands and
       the individual `install.site` files for each role.
 
-  * pkg_path:
+  * pkg_path
     * A list (one per line) of sites to add to the `PKG_PATH` environment.
       Can also be colon separated the same as a normal `PKG_PATH`.
 
-  * *_list:
+  * *_list
     * A list of arguments to commands to be run.  For example if `pkg_add_list`
       containing "rsync nrpe check_hw_sensors" will attempt to run
       `pkg_add rsync nrpe check_hw_sensors`.
@@ -96,21 +105,21 @@ Special files and directories inside the siteXX directory:
       Setting "`pkg_add_args='-i'`" in a siteXXrc would make the above command
       `pkg_add -i rsync nrpe check_hw_sensors`
 
-  * patches/:
+  * patches/
     * All patches in this dir need to be relative to the root of the system
       where the tgz was extracted.
 
-  * packages/:
+  * packages/
     * Package files that will get installed.  Completely separate from
       pkg_add_list above.  It does inherit `pkg_path` and `pkg_add_args`.
 
-  * install.site:
+  * install.site
     * Your script that gets run after all the above things have been done.
 
 ### MTREE ###
 
 You can use `sxxu -m` to generate mtree spec files.  This will generate the
-files with the permissions that are gotten after copying and applying the
+spec files with the permissions the files have after copying and applying the
 existing mtree file.
 
 You can get some more advanced features with some other switches.
