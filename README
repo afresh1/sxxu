@@ -116,6 +116,16 @@ Special files and directories inside the siteXX directory:
   * install.site
     * Your script that gets run after all the above things have been done.
 
+/etc/hostname.if files
+
+If you create /etc/hostname files with generic interfaces, then set 
+${interface}_if in siteXXrc to the name of the interface, sxxu will
+rename the hostname file to the interface you specified.
+
+If you create `/etc/hostname.egress` and in siteXX/siteXXrc set
+`egress_if=em0` then after other processing, the `/etc/hostname.egress` file
+will be renamed to `/etc/hostname.em0`
+
 ### MTREE ###
 
 You can use `sxxu -m` to generate mtree spec files.  This will generate the

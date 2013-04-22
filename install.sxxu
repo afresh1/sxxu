@@ -32,6 +32,19 @@ do_post() {
     echo 'See /var/log/install.log for install messages.'
 }
 
+rename_hostname_if() {
+    echo ' ==> Renaming hostname.if'
+    local _f
+    local _int
+    for _f in /etc/hostname.*; do
+        eval _int=\${${_f#*hostname.}_if}
+
+        [ -z "$_int" ] && continue
+        echo "  => $_f -> hostname.$_int";
+        mv $_f /etc/hostname.$_int
+    done
+}
+
 process_roles() {
     local _oldpwd="${PWD}"
 
@@ -56,6 +69,8 @@ process_roles() {
     for _role in "${_roles[@]}"; do
         apply_role "$_role"
     done
+
+    rename_hostname_if
 
     cd "${_oldpwd}"
 }
