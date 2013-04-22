@@ -1,0 +1,40 @@
+#	   user: andrew
+#	machine: trillian.afresh1.com
+#	   tree: /tmp/sxxu.rEcuDJGDe/role-flashrd
+#	   date: Sun Apr 21 19:16:19 2013
+
+# .
+/set type=file uid=0 gid=0 mode=0644
+.               type=dir mode=0755
+    flashrd.site
+    flashrd.site~
+
+# ./etc
+etc             type=dir mode=0755
+# ./etc
+..
+
+
+# ./var
+/set type=file uid=0 gid=0 mode=0755
+var             type=dir
+
+# ./var/siteXX
+/set type=file uid=0 gid=0 mode=0644
+siteXX          type=dir mode=0755
+    roles      
+
+# ./var/siteXX/role-flashrd
+role-flashrd    type=dir mode=0755
+    mtree      
+# ./var/siteXX/role-flashrd
+..
+
+# ./var/siteXX
+..
+
+# ./var
+..
+
+..
+

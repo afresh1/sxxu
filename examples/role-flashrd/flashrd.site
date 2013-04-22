@@ -1,0 +1,18 @@
+active_interface() {
+    ifconfig | awk '
+        BEGIN { A = "" };
+        /^[^[:space:]]/ { if (A == "") { INT = $1 } };
+        /status: active/ { A=1 };
+        END { if (A != "") { sub(":", "", INT); print INT } }
+    '
+}
+
+int=`active_interface`
+
+if [ -n "$int" ]; then
+    dhclient $int
+else
+    echo Unable to find an active interface, no network enabled
+fi
+
+. /install.site
