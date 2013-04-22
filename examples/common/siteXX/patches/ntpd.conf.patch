@@ -1,0 +1,13 @@
+--- /usr/src/etc/ntpd.conf	Thu Jun  4 16:10:35 2009
++++ /etc/ntpd.conf	Thu Apr  8 12:40:31 2010
+@@ -9,7 +9,9 @@
+ 
+ # use a random selection of NTP Pool Time Servers
+ # see http://support.ntp.org/bin/view/Servers/NTPPoolServers
+-servers pool.ntp.org
++#servers pool.ntp.org
++servers 192.168.33.11
++servers 192.168.33.12
+ 
+ # use a specific local timedelta sensor (radio clock, etc)
+ #sensor nmea0

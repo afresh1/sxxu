@@ -1,0 +1,97 @@
+#	   user: andrew
+#	machine: trillian.afresh1.com
+#	   tree: /tmp/sxxu.Nq5UOEzGA/remote-router
+#	   date: Sun Apr 21 20:42:40 2013
+
+# .
+/set type=file uid=0 gid=0 mode=0755
+.               type=dir
+
+# ./etc
+/set type=file uid=0 gid=0 mode=0644
+etc             type=dir mode=0755
+    dhcpd.conf 
+    hostname.egress
+    hostname.internal
+    myname     
+    pf.conf    
+    pf.conf~   
+
+# ./etc/isakmpd
+/set type=file uid=0 gid=0 mode=0755
+isakmpd         type=dir
+
+# ./etc/isakmpd/pubkeys
+pubkeys         type=dir
+
+# ./etc/isakmpd/pubkeys/fqdn
+fqdn            type=dir
+# ./etc/isakmpd/pubkeys/fqdn
+..
+
+
+# ./etc/isakmpd/pubkeys/ipv4
+ipv4            type=dir
+# ./etc/isakmpd/pubkeys/ipv4
+..
+
+
+# ./etc/isakmpd/pubkeys/ipv6
+ipv6            type=dir
+# ./etc/isakmpd/pubkeys/ipv6
+..
+
+
+# ./etc/isakmpd/pubkeys/ufqdn
+ufqdn           type=dir
+# ./etc/isakmpd/pubkeys/ufqdn
+..
+
+# ./etc/isakmpd/pubkeys
+..
+
+# ./etc/isakmpd
+..
+
+# ./etc
+..
+
+
+# ./var
+var             type=dir
+
+# ./var/siteXX
+siteXX          type=dir
+    roles       mode=0644
+
+# ./var/siteXX/gateway
+gateway         type=dir
+# ./var/siteXX/gateway
+..
+
+
+# ./var/siteXX/remote-router
+/set type=file uid=0 gid=0 mode=0644
+remote-router   type=dir mode=0755
+    install.site
+    install.site~
+    mtree      
+    roles      
+    siteXXrc   
+# ./var/siteXX/remote-router
+..
+
+
+# ./var/siteXX/wflhcrtr0400
+wflhcrtr0400    type=dir mode=0755
+# ./var/siteXX/wflhcrtr0400
+..
+
+# ./var/siteXX
+..
+
+# ./var
+..
+
+..
+

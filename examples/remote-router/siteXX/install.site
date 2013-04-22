@@ -1,0 +1,5 @@
+#!/bin/sh
+echo 'dhcpd_flags=""' >> /etc/rc.conf.local
+
+cp /etc/snmpd.conf{,.orig}
+sed -e "s/\${internal_if}/$internal_if/" /etc/snmpd.conf.orig > /etc/snmpd.conf

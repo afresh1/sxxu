@@ -1,0 +1,6 @@
+#!/bin/sh
+
+echo net.inet.ip.forwarding=1    >> /etc/sysctl.conf
+echo net.inet.ip.ifq.maxlen=1024 >> /etc/sysctl.conf
+
+echo 'snmpd_flags=""' >> /etc/rc.conf.local

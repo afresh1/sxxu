@@ -1,0 +1,42 @@
+#	   user: andrew
+#	machine: trillian.afresh1.com
+#	   tree: /tmp/sxxu.VzzmRaLtJ/role-router
+#	   date: Sun Apr 21 20:41:11 2013
+
+# .
+/set type=file uid=0 gid=0 mode=0755
+.               type=dir
+
+# ./etc
+/set type=file uid=0 gid=0 mode=0644
+etc             type=dir mode=0755
+    snmpd.conf 
+# ./etc
+..
+
+
+# ./var
+/set type=file uid=0 gid=0 mode=0755
+var             type=dir
+
+# ./var/siteXX
+/set type=file uid=0 gid=0 mode=0644
+siteXX          type=dir mode=0755
+    roles      
+
+# ./var/siteXX/role-router
+role-router     type=dir mode=0755
+    install.site
+    install.site~
+    mtree      
+# ./var/siteXX/role-router
+..
+
+# ./var/siteXX
+..
+
+# ./var
+..
+
+..
+

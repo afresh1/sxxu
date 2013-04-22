@@ -1,0 +1,3 @@
+#!/bin/sh
+
+/usr/local/libexec/amanda/patch-system --disable-index --disable-tape

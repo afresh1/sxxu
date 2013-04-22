@@ -1,0 +1,63 @@
+#	   user: andrew
+#	machine: trillian.afresh1.com
+#	   tree: /tmp/sxxu.VzzmRaLtJ/common
+#	   date: Sun Apr 21 20:41:10 2013
+
+# .
+/set type=file uid=0 gid=0 mode=0755
+.               type=dir
+
+# ./etc
+/set type=file uid=0 gid=0 mode=0644
+etc             type=dir mode=0755
+    adduser.conf
+    resolv.conf
+    resolv.conf~
+# ./etc
+..
+
+
+# ./operator
+operator        type=dir uid=2 gid=5 mode=0755
+# ./operator
+..
+
+
+# ./var
+/set type=file uid=0 gid=0 mode=0755
+var             type=dir
+
+# ./var/siteXX
+/set type=file uid=0 gid=0 mode=0644
+siteXX          type=dir mode=0755
+    roles      
+
+# ./var/siteXX/common
+common          type=dir mode=0755
+    install.site
+    install.site~
+    mtree      
+    pkg_add_list~
+    pkg_path   
+    pkg_path~  
+    roles      
+
+# ./var/siteXX/common/patches
+patches         type=dir mode=0755
+    ntpd.conf.patch
+    ntpd.conf.patch~
+    patch-etc_sudoers
+# ./var/siteXX/common/patches
+..
+
+# ./var/siteXX/common
+..
+
+# ./var/siteXX
+..
+
+# ./var
+..
+
+..
+

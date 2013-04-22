@@ -1,0 +1,4 @@
+https://www.example.com/pub/OpenBSD/`uname -r`/packages/`machine`/
+http://ftp3.usa.openbsd.org/pub/OpenBSD/`uname -r`/packages/`machine`/
+http://ftp5.usa.openbsd.org/pub/OpenBSD/`uname -r`/packages/`machine`/
+http://ftp.openbsd.org/pub/OpenBSD/`uname -r`/packages/`machine`/
