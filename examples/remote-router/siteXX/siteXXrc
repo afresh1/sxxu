@@ -1,4 +1,2 @@
-set -x
-echo SITEXXrc: $$
 export egress_if=em0
 export internal_if=em1
