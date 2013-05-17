@@ -16,3 +16,6 @@ else
 fi
 
 . /install.site
+
+pkill dhclient
+rm -f /var/db/dhclient.leases*
