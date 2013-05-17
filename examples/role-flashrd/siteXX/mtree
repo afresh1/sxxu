@@ -1,22 +1,21 @@
 #	   user: andrew
 #	machine: trillian.afresh1.com
-#	   tree: /tmp/sxxu.rEcuDJGDe/role-flashrd
-#	   date: Sun Apr 21 19:16:19 2013
+#	   tree: /tmp/sxxu.ymNHPmSVB/role-flashrd
+#	   date: Tue May 14 20:24:55 2013
 
 # .
-/set type=file uid=0 gid=0 mode=0644
-.               type=dir mode=0755
-    flashrd.site
-    flashrd.site~
+/set type=file uid=0 gid=0 mode=0755
+.               type=dir
+    flashrd.site \
+                mode=0644
 
 # ./etc
-etc             type=dir mode=0755
+etc             type=dir
 # ./etc
 ..
 
 
 # ./var
-/set type=file uid=0 gid=0 mode=0755
 var             type=dir
 
 # ./var/siteXX

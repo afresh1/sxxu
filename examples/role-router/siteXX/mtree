@@ -1,7 +1,7 @@
 #	   user: andrew
 #	machine: trillian.afresh1.com
-#	   tree: /tmp/sxxu.VzzmRaLtJ/role-router
-#	   date: Sun Apr 21 20:41:11 2013
+#	   tree: /tmp/sxxu.rMForsQ17/role-router
+#	   date: Mon Apr 22 22:21:28 2013
 
 # .
 /set type=file uid=0 gid=0 mode=0755
@@ -27,7 +27,6 @@ siteXX          type=dir mode=0755
 # ./var/siteXX/role-router
 role-router     type=dir mode=0755
     install.site
-    install.site~
     mtree      
 # ./var/siteXX/role-router
 ..

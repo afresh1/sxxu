@@ -1,7 +1,7 @@
 #	   user: andrew
 #	machine: trillian.afresh1.com
-#	   tree: /tmp/sxxu.Nq5UOEzGA/remote-router
-#	   date: Sun Apr 21 20:42:40 2013
+#	   tree: /tmp/sxxu.Mv0aqUdc7/remote-router
+#	   date: Thu May 16 21:17:57 2013
 
 # .
 /set type=file uid=0 gid=0 mode=0755
@@ -15,7 +15,6 @@ etc             type=dir mode=0755
     hostname.internal
     myname     
     pf.conf    
-    pf.conf~   
 
 # ./etc/isakmpd
 /set type=file uid=0 gid=0 mode=0755
@@ -74,7 +73,6 @@ gateway         type=dir
 /set type=file uid=0 gid=0 mode=0644
 remote-router   type=dir mode=0755
     install.site
-    install.site~
     mtree      
     roles      
     siteXXrc   

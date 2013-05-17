@@ -1,7 +1,7 @@
 #	   user: andrew
 #	machine: trillian.afresh1.com
-#	   tree: /tmp/sxxu.VzzmRaLtJ/common
-#	   date: Sun Apr 21 20:41:10 2013
+#	   tree: /tmp/sxxu.Mv0aqUdc7/common
+#	   date: Thu May 16 21:17:56 2013
 
 # .
 /set type=file uid=0 gid=0 mode=0755
@@ -12,7 +12,6 @@
 etc             type=dir mode=0755
     adduser.conf
     resolv.conf
-    resolv.conf~
 # ./etc
 ..
 
@@ -35,17 +34,13 @@ siteXX          type=dir mode=0755
 # ./var/siteXX/common
 common          type=dir mode=0755
     install.site
-    install.site~
     mtree      
-    pkg_add_list~
     pkg_path   
-    pkg_path~  
     roles      
 
 # ./var/siteXX/common/patches
 patches         type=dir mode=0755
     ntpd.conf.patch
-    ntpd.conf.patch~
     patch-etc_sudoers
 # ./var/siteXX/common/patches
 ..
