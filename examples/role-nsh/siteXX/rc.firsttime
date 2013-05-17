@@ -1,0 +1,101 @@
+#!/bin/sh
+
+groupadd nshusers
+echo '%nshusers	ALL=NOPASSWD:/bin/nsh' >> /etc/sudoers
+
+awk -F : '{ if ($3 > 999 && $3 < 32767) print $1 }' < /etc/passwd |
+    while read user; do
+        usermod -s /bin/nwrapper -G nshusers -d /var/empty $user
+    done
+
+echo sshd_flags=NO >>/etc/rc.conf.local
+echo pf=NO         >>/etc/rc.conf.local
+echo inetd=NO      >>/etc/rc.conf.local
+
+nshrc=/var/run/nshrc
+nsh=/bin/nsh
+if sysctl -n kern.osversion | grep -q FLASHRD; then
+    nshrc=/flash/nshrc
+    nsh="$nsh -i $nshrc"
+fi
+echo "ulimit -n 1024; $nsh" >> /etc/rc.local
+
+if [ ! -e "$nshrc" ]; then
+    NSH_FILES="
+    /var/run/pf.conf.0
+    /var/run/ospfd.conf.0
+    /var/run/ospf6d.conf.0
+    /var/run/bgpd.conf.0
+    /var/run/ripd.conf.0
+    /var/run/ldpd.conf.0
+    /var/run/relayd.conf.0
+    /var/run/ipsec.conf.0
+    /var/run/iked.conf.0
+    /var/run/rtadvd.conf.0
+    /var/run/dvmrpd.conf.0
+    /var/run/sasyncd.conf.0
+    /var/run/dhcpd.conf.0
+    /var/run/snmpd.conf.0
+    /var/run/sshd.conf.0
+    /var/run/ntpd.conf.0
+    /var/run/npppd.conf.0
+    /var/run/resolv.conf.0
+    /var/run/inetd.conf.0
+    /var/run/smtpd.conf.0
+    /var/run/ldapd.conf.0
+    /var/run/ifstated.conf.0
+    "
+
+    NSH_SRC=$(cd / && cksum -c /var/db/sysmerge/etcsum  2>/dev/null |
+        sed -ne 's/([^)]*) \(.*\): FAILED/\1/p')
+
+    # We always want sshd, but it needs an "empty" config
+    echo '# flashrd using defaults' > /var/run/sshd.conf.0
+
+    NSH_CONTROL=
+    echo -n copying for nsh:
+    for dst in $NSH_FILES; do
+        d=`basename "${dst%.0}"`
+        for src in $NSH_SRC; do
+            s=`basename "$src"`
+            if [ X"$s" == X"$d" ]; then
+                cp "$src" "$dst"
+                break
+            fi
+        done
+        if [ -e "$dst" ]; then
+            echo -n " $d"
+            NSH_CONTROL="$NSH_CONTROL ${d%.conf}"
+        fi
+    done
+    echo .
+
+    for f in /etc/hostname* /etc/mygate; do
+        [ -e $f ] || continue
+        mv $f ${f}.orig
+    done
+
+    # TODO figure out how to disable any of these that may
+    # TODO start outside of nsh.
+    echo -n enabling nsh:
+    /bin/nsh |&
+    print -p enable
+
+    if [ -n "$NSH_CONTROL" ]; then
+    for c in $NSH_CONTROL; do
+        [  "$c" != "bgpd" \
+        -a "$c" != "sshd" \
+        ] && c=${c%d}
+
+        echo -n " $c"
+        print -p $c enable
+    done
+    fi
+
+    print -p write
+    print -p quit
+    echo .
+
+    echo "Rebooting . . ."
+    /sbin/reboot
+fi

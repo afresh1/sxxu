@@ -1,0 +1,61 @@
+#	   user: andrew
+#	machine: trillian.afresh1.com
+#	   tree: /tmp/siteXX/role-nsh
+#	   date: Tue May 14 20:24:05 2013
+
+# .
+/set type=file uid=0 gid=0 mode=0755
+.               type=dir
+
+# ./bin
+bin             type=dir
+    nsh        
+    nwrapper   
+# ./bin
+..
+
+
+# ./usr
+usr             type=dir
+
+# ./usr/local
+local           type=dir
+
+# ./usr/local/bin
+bin             type=dir
+    save.sh    
+# ./usr/local/bin
+..
+
+# ./usr/local
+..
+
+# ./usr
+..
+
+
+# ./var
+var             type=dir
+
+# ./var/siteXX
+/set type=file uid=0 gid=0 mode=0644
+siteXX          type=dir mode=0755
+    roles      
+
+# ./var/siteXX/role-nsh
+role-nsh        type=dir mode=0755
+    install.site
+    mtree      
+    rc.firsttime \
+                mode=0755
+# ./var/siteXX/role-nsh
+..
+
+# ./var/siteXX
+..
+
+# ./var
+..
+
+..
+

@@ -1,0 +1,2 @@
+#!/bin/sh
+echo '/var/siteXX/role-nsh/rc.firsttime' >> /etc/rc.firsttime
